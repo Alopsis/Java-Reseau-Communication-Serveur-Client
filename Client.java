@@ -78,7 +78,7 @@ public class Client {
 	
 			String dem = string.nextToken();
 	
-			System.out.println("Vous voulez envoyer " + dem);
+			System.out.println("C : Vous voulez envoyer " + dem);
 			envoyerViaSocket(dem);
 		}
 
@@ -110,6 +110,7 @@ public class Client {
 		client.initierConnexion();
 		client.attendreConfirmationConnexion();
 		client.envoyerDemande();
+		
 	}
 
 }

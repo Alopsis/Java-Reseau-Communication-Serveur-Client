@@ -18,20 +18,24 @@ import java.awt.event.ActionEvent;
 import java.util.StringTokenizer;
 import java.awt.event.KeyListener;
 import java.awt.event.ActionListener;
+
+import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import java.awt.*;
 
-public class Serveur implements KeyListener {
+public class Serveur implements KeyEventDispatcher {
 
 	private static final int PORT = 2121;
 	private ServerSocket servSocket;
 	List<Socket> listClientSocket = new ArrayList();
 	List<DataInputStream> listdIn = new ArrayList();
 	List<DataOutputStream> listdOut = new ArrayList();
-
+	private boolean fin = false;
+	Thread rechercheServeur = new Thread();
 	// Instanti le serveur (il est ouvert)
 	public Serveur() {
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 		try {
 			servSocket = new ServerSocket(PORT);
 			System.out.println("S : serveur actif");
@@ -46,19 +50,19 @@ public class Serveur implements KeyListener {
 
 		System.out.println("On attend le client");
 		Socket socketAttente = null;
-		while (true) {
+		while (fin == false) {
 			try {
-
 				socketAttente = servSocket.accept();
 				if (socketAttente != null) {
 					listClientSocket.add(socketAttente);
-					break;
+					socketAttente = null;
 				}
 			} catch (Exception e) {
 
 			}
 
 		}
+		System.out.println("Fin");
 	}
 
 	public void ouvrirFlux() {
@@ -102,19 +106,16 @@ public class Serveur implements KeyListener {
 		}
 	}
 
-	public void keyTyped(KeyEvent e) {
-	}
 
-	public void keyPressed(KeyEvent e) {
+	// comme keylistener
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        if (e.getID() == KeyEvent.KEY_PRESSED) {
+            System.out.println("Key pressed: " + KeyEvent.getKeyText(e.getKeyCode()));
+			fin = true;
+        }
+        return false;
+    }
 
-		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-		}
-
-	}
-
-	public void keyReleased(KeyEvent e) {
-
-	}
 
 	public synchronized void attendreMessage() {
 		while(true){
@@ -143,7 +144,15 @@ public class Serveur implements KeyListener {
 	}
 
 	public static void main(String[] args) {
+		JFrame frame = new JFrame("Test");
+		frame.setTitle("Test collision");
+        frame.setSize(50,50);
+        frame.setLayout(null);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
 		Serveur serv = new Serveur();
+		
 		serv.ecouter();
 		serv.ouvrirFlux();
 		serv.envoyerConfirm();
@@ -155,8 +164,9 @@ public class Serveur implements KeyListener {
 		// 	}
 		// });
 		// timerReceptionMessage.start();
-		serv.attendreMessage();
-		
+		new Thread(() -> {
+			serv.attendreMessage();
+        }).start();    
 
 	}
 

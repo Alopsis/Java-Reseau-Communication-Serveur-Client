@@ -14,7 +14,6 @@ import java.util.StringTokenizer;
 
 public class Client {
 
-	private static final String CHEMIN_CLIENT = "./tp1/FichiersClient/";
 	private String hote;
 	private int port;
 	private Socket cliSocket;
